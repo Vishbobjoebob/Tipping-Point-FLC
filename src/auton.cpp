@@ -835,7 +835,7 @@ void rotatePID(int angle, int maxPower, double kP, double kI, double kD) {
   brakeDrive();
 }
 
-void arcPID(int angle, int maxPower, double kP, double kI, double kD, double rightProp) {
+void arcPID(int angle, int maxPower, double kP, double kI, double kD, double leftProp, double rightProp) {
   resetFunction();
   double maxError = 3;
   static uint64_t c;
@@ -849,7 +849,7 @@ void arcPID(int angle, int maxPower, double kP, double kI, double kD, double rig
     printf(" up inertial %f\n", inertial_Up.rotation(deg));
     printf(" down inertial %f\n", inertial_Down.rotation(deg));
     int power = abs(PIDPower) < maxPower ? PIDPower : maxPower * (PIDPower / abs(PIDPower));
-    leftDrive.spin(fwd,  -power, velocityUnits::pct);
+    leftDrive.spin(fwd,  -power*leftProp, velocityUnits::pct);
     rightDrive.spin(fwd, power*rightProp, velocityUnits::pct);
     if (fabs(get_average_inertial() - angle) < maxError || cancelStart == true){
       if(c++ == 0){
@@ -1013,7 +1013,31 @@ void stopIntakeOn(){
 }
 
 
+int unfoldProcedure() {
+  tilter.rotateTo(-2, rotationUnits::rev, 100, velocityUnits::rpm, true) ;
+  return 1;
+}
 
+int dumpRing() {
+  tilter.rotateTo(0.2, rotationUnits::rev, 100, velocityUnits::rpm, true);
+  ringIntake.spin(fwd, -90, pct) ;
+
+  return 1;
+}
+
+void brakeTilter() {
+  tilter.stop(hold);
+  ringIntake.stop(hold);
+}
+
+void createTilterUnfoldTask() {
+  task tilter = task(unfoldProcedure);
+}
+
+void stopUnfold() {
+  task::stop(unfoldProcedure);
+  brakeTilter();
+}
 
 
 
@@ -1309,9 +1333,15 @@ void homeRowAuton(){
   //moveForward(50,5);
   moveForwardWalk(5,75,0,0.6,5);
   wait(0.5, sec);
-  arcPID(180, 90, 1.5 , 0.4, 0.01, 0.1);
-  //moveForwardWalk(96, 90, 0, 0.6, 5);
-  //rotatePID(90, 90, 0.8, 0.1, 0.01);
+  arcPID(177, 90,1.7 , 0.25, 0.01, 1, 0);
+  wait(0.5, sec);
+  createTilterUnfoldTask();
+  moveForwardWalk(-150,90,0,0.6,5);
+  stopUnfold();
+  wait(0.5, sec);
+  dumpRing();
+  moveForwardWalk(15,90,0,0.6,5);
+  stopUnfold();
 }
 
-//rotate PID (0.8, 0.1, 0.01)
+//rotate PID values (0.8, 0.1, 0.01)
