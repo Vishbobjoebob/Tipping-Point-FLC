@@ -7,6 +7,7 @@ using namespace vex;
 double leftDriveSpeed, rightDriveSpeed, leftDriveCalculation, rightDriveCalculation;
 double angle, prevAngle = 0;
 bool manual = false;
+bool tilterIsSpinning = false;
 
 /*-----------------------------------------------------------------------------*/
 /** @brief     Base Control */
@@ -16,8 +17,6 @@ void joyStickControl() {
     //printf("motor tmep: %.2f\n: ", leftDrive.temperature(pct)) ;
     leftDriveCalculation = (Controller1.Axis1.position() - (Controller1.Axis3.position()));
     rightDriveCalculation = (Controller1.Axis1.position() + (Controller1.Axis3.position()));
-
-  
     
     if(fabs(leftDriveCalculation) >= 40){
       leftDriveSpeed = leftDriveCalculation; 
@@ -34,26 +33,7 @@ void joyStickControl() {
     }
     leftDriveSpeed = sgn(leftDriveCalculation) * ( 0.01 *(pow(leftDriveCalculation, 2))); 
     rightDriveSpeed = sgn(rightDriveCalculation) * ( 0.01 *(pow(rightDriveCalculation, 2))); 
-
-
-    /*
-    while (angle > prevAngle) {
-      leftDriveSpeed -= 0.1 ;
-      rightDriveSpeed -= 0.1 ;
-    }
-    while (angle < prevAngle) {
-      leftDriveSpeed += 0.1 ;
-      rightDriveSpeed += 0.1 ;
-    }
-  */
-    //printf("leftDrive %ld\n", Controller1.Axis3.position());
-    //printf("rightDrive %ld\n", Controller1.Axis1.position());
     
-    //leftDrive.spin (fwd, (Controller1.Axis2.position() + (Controller1.Axis1.position())), pct);
-    //rightDrive.spin(fwd, (Controller1.Axis2.position() - (Controller1.Axis1.position())), pct);
-    //printf("Left:  %2f\n", leftDriveSpeed);
-    //printf("Right: %2f\n", rightDriveSpeed) ;
-
     if ((leftDriveSpeed > 0 && rightDriveSpeed > 0) || (leftDriveSpeed < 0 && rightDriveSpeed < 0)) {
       leftDrive.spin(fwd, -leftDriveSpeed * 0.50, pct);
       rightDrive.spin(fwd, -rightDriveSpeed * 0.50, pct);
@@ -149,20 +129,25 @@ void pistonControl() {
 int tilterControl(void) {
   if (manual==false) {
     if (Controller1.ButtonA.pressing()) {
-      tilter.rotateTo(0.0, rotationUnits::rev, 100, velocityUnits::rpm, true) ;
+      if (tilterSwitch.pressing() == 0) {
+        tilter.spin(fwd, 200, velocityUnits::rpm);
+      }
     }
 
     else if (Controller1.ButtonB.pressing()) {
-      tilter.rotateTo(-2.0, rotationUnits::rev, 100, velocityUnits::rpm, true) ;
+      tilter.rotateTo(-1.1, rotationUnits::rev, 170, velocityUnits::rpm, true) ;
+    }
+    else if (tilterSwitch.pressing() == 1) {
+      tilter.stop(hold);
     }
   }
   else {
     if (Controller1.ButtonA.pressing()) {
-      tilter.spin(fwd, -90, pct) ;
+      tilter.spin(fwd, 90, pct) ;
     }
 
     else if (Controller1.ButtonB.pressing()) {
-      tilter.spin(fwd, 90, pct) ;
+      tilter.spin(fwd, -85, pct) ; 
     }
     else {
       tilter.stop(hold);
@@ -172,12 +157,12 @@ int tilterControl(void) {
 }
 
 int manualControl() {
-  if (Controller1.ButtonX.pressing()) {
-    manual = true;
-  }
-  else if (Controller1.ButtonY.pressing()) {
-    manual = false;
-  }
+  // if (Controller1.ButtonX.pressing()) {
+  //   manual = true;
+  // }
+  // else if (Controller1.ButtonY.pressing()) {
+  //   manual = false;
+  // }
 
   return 1;
 }

@@ -19,17 +19,20 @@ competition Competition;
 
 void pre_auton(void) {
   vexcodeInit();
+  inertialCalibration();
+  resetEncoders();
 
 }
 
-void autonomous(void) { 
-  inertialCalibration();
-  homeRowAuton();
+void autonomous(void) {
+  neutralMogoAuton();
+  //homeRowAuton();
+  //skills();
 }
 
 void usercontrol(void) {
   task::sleep(500);
-  resetEncoders();
+  
   //piston.set(false);
   //inertialCalibration();
   while (1) {

@@ -483,7 +483,6 @@ void moveForwardWalk(double distanceIn, double maxVelocity, double headingOfRobo
       break;
     }
     
-
     //y\ =\ 2\cos\left(\frac{x}{20}\right)\ +2
 
     PIDPowerHeading = iHeadingPid(headingOfRobot); //pid heading calculated
@@ -730,7 +729,6 @@ void forwardPID(double target, double headingVal, double counterThresh, double a
 bool exit_function = false;
 
 PID sRotatePid;
-double;
 
 int iRotatePid(int target, double kP, double kI, double kD) {
   sRotatePid.kP = kP; //0.48
@@ -1014,15 +1012,47 @@ void stopIntakeOn(){
 
 
 int unfoldProcedure() {
-  tilter.rotateTo(-2, rotationUnits::rev, 100, velocityUnits::rpm, true) ;
+  tilter.rotateTo(-1.1, rotationUnits::rev, 200, velocityUnits::rpm, true) ;
+  return 1;
+}
+
+int tilterUp() {
+  if (tilterSwitch.pressing() == 0) {
+      tilter.spin(fwd, 200, velocityUnits::rpm);
+  }
+  else {
+    tilter.stop(hold);
+  }
   return 1;
 }
 
 int dumpRing() {
-  tilter.rotateTo(0.2, rotationUnits::rev, 100, velocityUnits::rpm, true);
+  tilter.rotateTo(0.2, rotationUnits::rev, 200, velocityUnits::rpm, true);
   ringIntake.spin(fwd, -90, pct) ;
 
   return 1;
+}
+
+int armUpForMogo() {
+  lift.rotateTo(-0.2, rotationUnits::rev, 100, velocityUnits::rpm, true);
+  
+  return 1;
+}
+
+int armUp() {
+  lift.rotateTo(-2.65, rotationUnits::rev, 100, velocityUnits::rpm, true);
+
+  return 1;
+}
+
+int armDown() {
+  lift.rotateTo(0, rotationUnits::rev, 100, velocityUnits::rpm, true);
+  
+  return 1;
+}
+
+void brakeArm() {
+  lift.stop(hold);
 }
 
 void brakeTilter() {
@@ -1030,8 +1060,38 @@ void brakeTilter() {
   ringIntake.stop(hold);
 }
 
+
+
 void createTilterUnfoldTask() {
   task tilter = task(unfoldProcedure);
+}
+
+void createArmUpMogoTask() {
+  task armUpMogo = task(armUpForMogo);
+}
+
+void createArmUpTask() {
+  task arm = task(armUp);
+}
+
+void stopArm() {
+  task::stop(armUpForMogo);
+  brakeArm();
+}
+
+
+void stopArmUp() {
+  task::stop(armUp);
+  brakeArm();
+}
+
+void createArmDownTask(){
+  task arm = task(armDown);
+}
+
+void stopArmDown() {
+  task::stop(armDown);
+  brakeArm();
 }
 
 void stopUnfold() {
@@ -1039,6 +1099,10 @@ void stopUnfold() {
   brakeTilter();
 }
 
+void stopRing() {
+  task::stop(dumpRing);
+  brakeTilter();
+}
 
 
 
@@ -1159,162 +1223,54 @@ void centerGoalAuton(){
   //moveForwardWalk(-24, 100, -163, 1000);
 
 }
-
+*/
 void skills(){
-  createBallCountTask();
-  setIntakeSpeed(-100);
-  indexer.spin(fwd, 100, pct);
-  task::sleep(500);
-  brakeIntake();
-  indexer.stop(); 
-  createIntakeOnTask();
-  moveForwardWalk(12, 90, 0, 1000);
-  task::sleep(50);
-  rotatePID(45, 80);
-  moveForwardWalk(26, 90, 45, 1000);
-  task::sleep(50);
-  rotatePID(90, 80);
-  moveForwardWalk(24, 90, 90, 1000);
-  while(ballC < 2){
-    task::sleep(10);
-  }
-  stopIntakeOn();
-  task::sleep(50);
-  outtake1BallAuton(); // 1
-  createFlushOutIntake();
-  moveForwardWalk(-16, 50, 90, 10);
-  task::sleep(50);
-  rotatePID(-45, 80);
-  stopFlushOutIntake();
-  ballC = 0;
-  createIntakeOnTask();
-  moveForwardWalk(46.5, 90, -45, 1000);
-  task::sleep(50);
-  rotatePID(46, 80);
-  moveForwardWalk(8, 90, 45, 1000);
-  while(ballC < 2){
-  task::sleep(10);
-  }
-  stopIntakeOn();
-  task::sleep(50);
-  outtake1BallAuton(); //2
-  task::sleep(100);
-  createFlushOutIntake();
-  moveForwardWalk(-19, 50, 45, 10);
-  task::sleep(50);
-  rotatePID(-45, 80);
-  ballC = 0;
-  stopFlushOutIntake();
-  createIntakeOnTask();
-  moveForwardWalk(48, 90, -45, 1000);
-  task::sleep(50);
-  moveForwardWalk(-14, 90, -45, 10);
-  task::sleep(50);
-  rotatePID(0, 80);
-  moveForwardWalk(38, 70, 0, 1000);
-  while(ballC < 2){
-  task::sleep(10);
-  }
-  stopIntakeOn();
-  task::sleep(100);
-  outtake1BallAuton(); //3
-  createFlushOutIntake();
-  moveForwardWalk(-47, 50, 0, 10);
-  task::sleep(50);
-  rotatePID(-135, 80);
-  stopFlushOutIntake();
-  ballC = 0;
-  createIntakeOnTask();
-  moveForwardWalk(25.5, 90, -135, 1000);
-  task::sleep(50);
-  rotatePID(-44, 80);
-  moveForwardWalk(36, 70, -45, 1000);
-  while(ballC < 2){
-  task::sleep(10);
-  }
-  stopIntakeOn();
-  task::sleep(50);
-  outtake1BallAuton(); //4
-  createFlushOutIntake();
-  moveForwardWalk(-7, 85, -45, 0.6);
-  task::sleep(50);
-  rotatePID(-135, 80);
-  stopFlushOutIntake();
-  ballC = 0;
-  createIntakeOnTask();
-  moveForwardWalk(43, 85, -135, 1000);
-  task::sleep(50);
-  rotatePID(-90, 80);
-  moveForwardWalk(26, 85, -90, 1000);
-  while(ballC < 2){
-  task::sleep(10);
-  }
-  stopIntakeOn();
-  task::sleep(200);
-  outtake1BallAuton(); //5
-  createFlushOutIntake();
-  moveForwardWalk(-14, 85, -90, 2);
-  task::sleep(50);
-  rotatePID(-225, 80);
-  stopFlushOutIntake();
-  ballC = 0;
-  createIntakeOnTask();
-  moveForwardWalk(47, 85, -225, 1000);
-  task::sleep(50);
-  rotatePID(-135, 80);
-  moveForwardWalk(7, 60, -135, 1000);
-  while(ballC < 2){
-  task::sleep(10);
-  }
-  stopIntakeOn();
-  task::sleep(50);
-  outtake1BallAuton();
-  createFlushOutIntake();
-  moveForwardWalk(-19, 50, -135, 10);
-  task::sleep(50);
-  rotatePID(-225, 80);
-  stopFlushOutIntake();
-  ballC = 0;
-  createIntakeOnTask();
-  moveForwardWalk(70, 85, -225, 1000);
-  moveForwardWalk(-29, 80, -225, 10);
-  task::sleep(50);
-  rotatePID(-180, 80);
-  moveForwardWalk(39, 85, -180, 1000);
-  while(ballC < 2){
-  task::sleep(10);
-  }
-  stopIntakeOn();
-  task::sleep(50);
-  outtake1BallAuton();
-  createFlushOutIntake();
-  moveForwardWalk(-50, 50, -180, 10); 
-  task::sleep(50);
-  rotatePID(-315, 80); //-225
-  stopFlushOutIntake();
-  ballC = 0;
-  createIntakeOnTask();
-  moveForwardWalk(20, 85, -315, 1000); //-225
-  task::sleep(50);
-  rotatePID(-405, 80); //-45
-  stopIntakeOn();
-  setIntakeSpeed(-100);
-  moveForwardWalk(50, 40, -405, 0.001);
-  task::sleep(500);
-  outtake1BallAutonCenter();
-  task::sleep(250);
-  moveForwardWalk(-24, 40, 0, 0.1);
+  piston.set(true);
+  createTilterUnfoldTask();
+  wait(0.5, sec);
+  moveForwardWalk(-25,60,0,0.6,5);
+  wait(0.1, sec);
+  tilterUp();
+  arcPID(101, 90,1.7 , 0.25, 0.01, 0, -1);
+  moveForwardWalk(53.5,90,0,0.6,5);
+  wait(0.1, sec);
+  piston.set(false);
+  createArmUpTask();
+  arcPID(180, 90, 2, 0.4, 0.01, -0.6, -1);
+  moveForwardWalk(10,90,0,0.6,5);
+  stopArmUp();
+  wait(0.5, sec);
+  rotatePID(85, 90, 1.7, 0.4, 0.2);
+  moveForwardWalk(15,90,0,0.6,5);
+  wait(0.5, sec);
+  piston.set(true);
+  wait(0.5, sec);
+  rotatePID(15, 70, 1, 0.4, 0.01);
+  wait(0.5, sec);
+  createArmDownTask();
+  createTilterUnfoldTask();
+  moveForwardWalk(72,50,0,0.6,5);
+  stopArmDown();
+  stopUnfold();
+  wait(0.5, sec);
+  piston.set(false);
+  wait(0.5, sec);
+  moveForwardWalk(-42, 80, 0, 0.6, 5);
+  rotatePID(45, 70, 1, 0.4, 0.01);
+  wait(0.5, sec);
+  moveForwardWalk(-200, 80, 0, 0.6, 5);
 
 
-  moveForwardWalk(-4, 90, 0, 0.1);
-  moveForwardWalk(7, 40, 0, 0.1); //-405
-  moveForwardWalk(-4, 90, -405, 0.1); //-405
-  rotatePID(-315, 80); // -315
-  moveForwardWalk(-4, 50, -315, 0.1); // -315
-  rotatePID(45, 80); // -360
-  moveForwardWalk(15, 50, -360, 0.1); //-360
 
-}*/
+  
+
+  // moveForwardWalk(-12,90,177,0.6,5);
+  // rotatePID(90, 90, 1.7, 0.25, 0.01);
+  // moveForwardWalk(150, 90, 90, 0.6, 5);
+  // rotatePID(-135, 90, 1.7, 0.25, 0.01);
+  // moveForwardWalk(100, 135, 90, 0.6, 5);
+  
+}
 
 
 void testAuton(){ 
@@ -1327,21 +1283,51 @@ moveForwardWalk(20, 90, 0, 0.6, 5);
 }
 
 void homeRowAuton(){
-  //180: 0.445, 0 0.7
-  //90: 
-  //45: 
-  //moveForward(50,5);
-  moveForwardWalk(5,75,0,0.6,5);
+  moveForwardWalk(5,60,0,0.6,5);
+  piston.set(true);
   wait(0.5, sec);
-  arcPID(177, 90,1.7 , 0.25, 0.01, 1, 0);
+  createArmUpMogoTask();
+  arcPID(177, 90,1.7 , 0.25, 0.01, 1, 0.1);
+  stopArm();
   wait(0.5, sec);
   createTilterUnfoldTask();
-  moveForwardWalk(-150,90,0,0.6,5);
+  moveForwardWalk(-140,90,177,0.6,5);
   stopUnfold();
   wait(0.5, sec);
   dumpRing();
-  moveForwardWalk(15,90,0,0.6,5);
-  stopUnfold();
+  moveForwardWalk(25,90,177,0.6,5);
+  brakeDrive();
+  stopRing();
 }
+
+void elimsAuton() {
+  moveForwardWalk(66, 100, 0, 0.6, 5);
+  piston.set(true);
+  wait(0.25, sec);
+  moveForwardWalk(-52, 100, 0, 0.6, 5);
+}
+
+void neutralMogoAuton() {
+  piston.set(true);
+  moveForwardWalk(70, 100, 0, 0.6, 5);
+  moveForwardWalk(36, 60, 0, 0.6, 5);
+  holdDrive();
+  wait(0.25, sec);
+  piston.set(false);
+  wait(0.25, sec);
+  createTilterUnfoldTask();
+  moveForwardWalk(-50, 100, 0, 0.6, 5);
+  stopUnfold();
+  
+  rotatePID(-45, 70, 1, 0.4, 0.01);
+  moveForwardWalk(-10, 100, 0, 0.6, 5);
+  tilterUp();
+  dumpRing();
+  wait(1, sec);
+  stopRing();
+  
+  
+}
+
 
 //rotate PID values (0.8, 0.1, 0.01)

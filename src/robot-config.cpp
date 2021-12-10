@@ -15,8 +15,9 @@ motor intakeRight = motor(PORT6, ratio6_1, true);
 motor arm_L = motor(PORT4, ratio18_1, true);
 motor arm_R = motor(PORT3, ratio18_1, false);
 motor ringIntake = motor(PORT7, ratio6_1, true);
-motor tilter = motor(PORT8, ratio36_1, true);
+motor tilter = motor(PORT8, ratio18_1, true);
 digital_out piston = digital_out(Brain.ThreeWirePort.C);
+limit tilterSwitch = limit(Brain.ThreeWirePort.D);
 
 inertial inertial_Up = inertial(PORT11);
 inertial inertial_Down = inertial(PORT20);
