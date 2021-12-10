@@ -23,7 +23,7 @@ extern motor_group lift;
 extern digital_out piston;
 extern digital_out pistonTilter;
 extern motor tilter;
-
+extern limit tilterSwitch;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Text.

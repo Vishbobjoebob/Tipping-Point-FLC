@@ -155,6 +155,9 @@ void centerGoalAuton( void );
 
 void homeRowAuton( void );
 
+void elimsAuton( void );
+
+void neutralMogoAuton (void);
 extern bool whenIntakingPrime; 
 
 extern int counterForSigs; 
